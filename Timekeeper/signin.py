@@ -6,30 +6,32 @@ Created on Oct 14, 2015
 @author: Kagiu
 '''
 
-import argparse, json, os, datetime
-from functools import partial
+import argparse, json, os, datetime, sqlite3
 
 #comb = partial(datetime.datetime.combine, datetime.date.min)
 
 def isoTime(isotime):
-    return datetime.datetime.strptime(isotime, "%Y-%m-%dT%H:%M:%S.%f")
+    return datetime.datetime.strptime(isotime, "%Y-%m-%s T%H:%M:%S.%f")
 
 def fancyTime(time):
     return time.strftime("%A, %b %d at %H:%M")
 
 class TimeLogger:
-    def __init__(self, target = os.path.join(os.path.expanduser("~"), ".timelog")):
-        self.target = target
-        if os.path.exists(self.target):
-            file = open(self.target, "r")
-            self.data = json.load(file)
-            file.close()
-        else: self.data = {}
+    def __init__(self, target = os.path.join(os.path.expanduser("~"), ".timelog.db")):
+        self.db = sqlite3.connect(target)
+        self.cursor = self.db.cursor()
+        self.init()
     
-    def save(self):
-        file = open(self.target, "w")
-        json.dump(self.data, file)
-        file.close()
+    def init(self):
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS Members" +
+                            "(ID integer primary key, Name varchar(255) not null, Email varchar(255), Phone varchar(255), Address varchar(255))")
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS Signins(MemberID integer not null, Time varchar(255))")
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS Signouts(MemberID integer not null, Time varchar(255))")
+        self.db.commit()
+    
+    def save(self): self.db.commit()
+    
+    def add(self, person):
     
     def signIn(self, name, time = None):
         if not time: time = datetime.datetime.now()

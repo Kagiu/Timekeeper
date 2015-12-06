@@ -4,7 +4,7 @@ Created on Oct 29, 2015
 @author: Kagiu
 '''
 
-import sys, inspect
+import sys
 from PySide import QtGui, QtCore
 from signin import TimeLogger
 
